@@ -1,6 +1,12 @@
 package com.example.prm392_to_dolisttaskmanagerusingslite;
 
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.os.Bundle;
+import android.view.View;
+import android.widget.Button;
+import android.widget.EditText;
+import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
@@ -10,16 +16,19 @@ import androidx.core.view.WindowInsetsCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.example.prm392_to_dolisttaskmanagerusingsqlite.R;
-
-import java.util.ArrayList;
 import java.util.List;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements TaskAdapter.OnItemActionListener {
 
+    private EditText etTitle, etContent, etDate, etType;
+    private Button btnAdd;
     private RecyclerView rvTaskList;
     private TaskAdapter taskAdapter;
     private List<Task> taskList;
+    private DatabaseHelper databaseHelper;
+
+    private boolean isEditMode = false;
+    private int taskIdToUpdate = -1;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -32,16 +41,160 @@ public class MainActivity extends AppCompatActivity {
             return insets;
         });
 
+        // Initialize UI elements
+        etTitle = findViewById(R.id.et_title);
+        etContent = findViewById(R.id.et_content);
+        etDate = findViewById(R.id.et_date);
+        etType = findViewById(R.id.et_type);
+        btnAdd = findViewById(R.id.btn_add);
         rvTaskList = findViewById(R.id.rv_task_list);
+
+        // Initialize DatabaseHelper
+        databaseHelper = new DatabaseHelper(this);
+
+        // Setup RecyclerView
         rvTaskList.setLayoutManager(new LinearLayoutManager(this));
-
-        taskList = new ArrayList<>();
-        // Add some sample data
-        taskList.add(new Task("Học Java", "27/2/2023", true));
-        taskList.add(new Task("Học React Native", "24/3/2023", false));
-        taskList.add(new Task("Học Kotlin", "25/3/2023", false));
-
-        taskAdapter = new TaskAdapter(taskList);
+        taskList = databaseHelper.getAllTasks(); // Load tasks from database
+        taskAdapter = new TaskAdapter(taskList, this); // Pass 'this' as listener
         rvTaskList.setAdapter(taskAdapter);
+
+        // Set OnClickListener for Add/Save button
+        btnAdd.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (isEditMode) {
+                    updateTask();
+                } else {
+                    addTask();
+                }
+            }
+        });
+    }
+
+    private void addTask() {
+        String title = etTitle.getText().toString().trim();
+        String content = etContent.getText().toString().trim(); // Assuming 'content' will be used later or mapped to 'date'
+        String date = etDate.getText().toString().trim();
+        String type = etType.getText().toString().trim(); // Assuming 'type' will be used later or mapped to 'isCompleted'
+
+        if (title.isEmpty() || date.isEmpty() || content.isEmpty() || type.isEmpty()) {
+            Toast.makeText(this, "Please fill in all fields", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        Task newTask = new Task(title, date, false);
+        long newId = databaseHelper.addTask(newTask);
+        if (newId > 0) {
+            newTask.setId((int) newId);
+            taskList.add(newTask);
+            taskAdapter.notifyItemInserted(taskList.size() - 1);
+            clearInputFields();
+            Toast.makeText(this, "Task added successfully", Toast.LENGTH_SHORT).show();
+        } else {
+            Toast.makeText(this, "Failed to add task", Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    private void updateTask() {
+        String title = etTitle.getText().toString().trim();
+        String content = etContent.getText().toString().trim();
+        String date = etDate.getText().toString().trim();
+        String type = etType.getText().toString().trim();
+
+        if (title.isEmpty() || date.isEmpty() || content.isEmpty() || type.isEmpty()) {
+            Toast.makeText(this, "Please fill in all fields", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        // Get the existing task to preserve its isCompleted status
+        Task existingTask = databaseHelper.getTask(taskIdToUpdate);
+        if (existingTask != null) {
+            Task updatedTask = new Task(taskIdToUpdate, title, date, existingTask.isCompleted());
+            int rowsAffected = databaseHelper.updateTask(updatedTask);
+            if (rowsAffected > 0) {
+                // Update the task in the list
+                int index = -1;
+                for (int i = 0; i < taskList.size(); i++) {
+                    if (taskList.get(i).getId() == taskIdToUpdate) {
+                        index = i;
+                        break;
+                    }
+                }
+                if (index != -1) {
+                    taskList.set(index, updatedTask);
+                    taskAdapter.notifyItemChanged(index);
+                }
+                clearInputFields();
+                btnAdd.setText("ADD");
+                isEditMode = false;
+                taskIdToUpdate = -1;
+                Toast.makeText(this, "Task updated successfully", Toast.LENGTH_SHORT).show();
+            } else {
+                Toast.makeText(this, "Failed to update task", Toast.LENGTH_SHORT).show();
+            }
+        } else {
+            Toast.makeText(this, "Task not found for update", Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    private void clearInputFields() {
+        etTitle.setText("");
+        etContent.setText("");
+        etDate.setText("");
+        etType.setText("");
+    }
+
+    @Override
+    public void onEditTask(int position) {
+        Task task = taskList.get(position);
+        etTitle.setText(task.getTitle());
+        // Assuming 'content' field in layout maps to some detail not present in Task currently, or will be derived.
+        // For now, let's keep it simple and only populate fields we have in Task.
+        // etContent.setText(task.getContent()); // No 'content' field in Task yet, adjust if needed
+        etDate.setText(task.getDate());
+        // etType.setText(task.getType()); // No 'type' field in Task yet, adjust if needed
+
+        btnAdd.setText("SAVE");
+        isEditMode = true;
+        taskIdToUpdate = task.getId();
+    }
+
+    @Override
+    public void onDeleteTask(int position) {
+        Task task = taskList.get(position);
+
+        new AlertDialog.Builder(this)
+                .setTitle("Delete Task")
+                .setMessage("Are you sure you want to delete this task?")
+                .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        databaseHelper.deleteTask(task.getId());
+                        taskList.remove(position);
+                        taskAdapter.notifyItemRemoved(position);
+                        Toast.makeText(MainActivity.this, "Task deleted successfully", Toast.LENGTH_SHORT).show();
+                        // If a task was being edited and then deleted, reset form
+                        if (isEditMode && taskIdToUpdate == task.getId()) {
+                            clearInputFields();
+                            btnAdd.setText("ADD");
+                            isEditMode = false;
+                            taskIdToUpdate = -1;
+                        }
+                    }
+                })
+                .setNegativeButton("No", null)
+                .show();
+    }
+
+    @Override
+    public void onToggleTaskStatus(int position, boolean isChecked) {
+        Task task = taskList.get(position);
+        task.setCompleted(isChecked);
+        databaseHelper.updateTask(task);
+        
+        // Defer the notifyItemChanged call to avoid IllegalStateException
+        rvTaskList.post(() -> {
+            taskAdapter.notifyItemChanged(position); // Notify adapter to re-bind item, applying strike-through
+        });
     }
 }

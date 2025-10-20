@@ -3,11 +3,11 @@ plugins {
 }
 
 android {
-    namespace 'com.example.prm392_to_dolisttaskmanagerusingsqlite'
+    namespace 'com.example.prm392_to_dolisttaskmanagerusingslite'
     compileSdk 36
 
     defaultConfig {
-        applicationId "com.example.prm392_to_dolisttaskmanagerusingsqlite"
+        applicationId "com.example.prm392_to_dolisttaskmanagerusingslite"
         minSdk 24
         targetSdk 36
         versionCode 1

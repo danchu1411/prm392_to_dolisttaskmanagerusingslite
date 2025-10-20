@@ -16,9 +16,11 @@ import java.util.List;
 public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.TaskViewHolder> {
 
     private List<Task> tasks;
+    private OnItemActionListener listener;
 
-    public TaskAdapter(List<Task> tasks) {
+    public TaskAdapter(List<Task> tasks, OnItemActionListener listener) {
         this.tasks = tasks;
+        this.listener = listener;
     }
 
     @NonNull
@@ -41,12 +43,24 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.TaskViewHolder
             holder.tvTaskTitle.setPaintFlags(holder.tvTaskTitle.getPaintFlags() & (~Paint.STRIKE_THRU_TEXT_FLAG));
         }
 
+        // Set listeners for checkbox, edit, and delete icons
+        holder.cbTaskStatus.setOnCheckedChangeListener(null); // Clear previous listener to avoid issues with recycling
+        holder.cbTaskStatus.setChecked(task.isCompleted()); // Set state again after clearing listener
         holder.cbTaskStatus.setOnCheckedChangeListener((buttonView, isChecked) -> {
-            task.setCompleted(isChecked);
-            if (isChecked) {
-                holder.tvTaskTitle.setPaintFlags(holder.tvTaskTitle.getPaintFlags() | Paint.STRIKE_THRU_TEXT_FLAG);
-            } else {
-                holder.tvTaskTitle.setPaintFlags(holder.tvTaskTitle.getPaintFlags() & (~Paint.STRIKE_THRU_TEXT_FLAG));
+            if (listener != null) {
+                listener.onToggleTaskStatus(position, isChecked);
+            }
+        });
+
+        holder.ivEditTask.setOnClickListener(v -> {
+            if (listener != null) {
+                listener.onEditTask(position);
+            }
+        });
+
+        holder.ivDeleteTask.setOnClickListener(v -> {
+            if (listener != null) {
+                listener.onDeleteTask(position);
             }
         });
     }
@@ -71,5 +85,11 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.TaskViewHolder
             ivEditTask = itemView.findViewById(R.id.iv_edit_task);
             ivDeleteTask = itemView.findViewById(R.id.iv_delete_task);
         }
+    }
+
+    public interface OnItemActionListener {
+        void onEditTask(int position);
+        void onDeleteTask(int position);
+        void onToggleTaskStatus(int position, boolean isChecked);
     }
 }

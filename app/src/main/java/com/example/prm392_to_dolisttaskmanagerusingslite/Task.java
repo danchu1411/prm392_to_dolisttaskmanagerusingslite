@@ -1,9 +1,17 @@
 package com.example.prm392_to_dolisttaskmanagerusingslite;
 
 public class Task {
-    String title;
-    String date;
-    boolean isCompleted;
+    private int id;
+    private String title;
+    private String date;
+    private boolean isCompleted;
+
+    public Task(int id, String title, String date, boolean isCompleted) {
+        this.id = id;
+        this.title = title;
+        this.date = date;
+        this.isCompleted = isCompleted;
+    }
 
     public Task(String title, String date, boolean isCompleted) {
         this.title = title;
@@ -11,7 +19,14 @@ public class Task {
         this.isCompleted = isCompleted;
     }
 
-    // Getters and setters (optional, but good practice)
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
+    }
+
     public String getTitle() {
         return title;
     }
