@@ -11,19 +11,21 @@ import java.util.List;
 
 public class DatabaseHelper extends SQLiteOpenHelper {
     private static final String DATABASE_NAME = "taskmanager.db";
-    private static final int DATABASE_VERSION = 2;
+    private static final int DATABASE_VERSION = 3;
 
     public static final String TABLE_TASKS = "tasks";
     public static final String COLUMN_ID = "id";
     public static final String COLUMN_TITLE = "title";
     public static final String COLUMN_DATE = "date";
     public static final String COLUMN_IS_COMPLETED = "is_completed";
+    public static final String COLUMN_TYPE = "type";
 
     private static final String CREATE_TABLE_TASKS = "CREATE TABLE " + TABLE_TASKS + " (" +
             COLUMN_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
             COLUMN_TITLE + " TEXT, " +
             COLUMN_DATE + " TEXT, " +
-            COLUMN_IS_COMPLETED + " INTEGER DEFAULT 0)";
+            COLUMN_IS_COMPLETED + " INTEGER DEFAULT 0, " +
+            COLUMN_TYPE + " TEXT)";
 
     public DatabaseHelper(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
@@ -35,6 +37,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         values.put(COLUMN_TITLE, task.getTitle());
         values.put(COLUMN_DATE, task.getDate());
         values.put(COLUMN_IS_COMPLETED, task.isCompleted() ? 1 : 0);
+        values.put(COLUMN_IS_COMPLETED, task.getType());
         db.insert(TABLE_TASKS, null, values);
     }
 
@@ -82,7 +85,8 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 String title = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_TITLE));
                 String date = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_DATE));
                 boolean isCompleted = cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_IS_COMPLETED)) == 1;
-                taskList.add(new Task(id, title, date, isCompleted));
+                String type = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_TYPE));
+                taskList.add(new Task(id, title, date, isCompleted, type));
             } while (cursor.moveToNext());
         }
         cursor.close();
@@ -128,7 +132,8 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                     cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_ID)),
                     cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_TITLE)),
                     cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_DATE)),
-                    cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_IS_COMPLETED)) == 1);
+                    cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_IS_COMPLETED)) == 1,
+                    cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_TYPE)));
             cursor.close();
         }
         db.close(); // Close the database connection

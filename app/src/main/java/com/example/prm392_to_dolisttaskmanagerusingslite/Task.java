@@ -5,12 +5,14 @@ public class Task {
     private String title;
     private String date;
     private boolean isCompleted;
+    private String type;
 
-    public Task(int id, String title, String date, boolean isCompleted) {
+    public Task(int id, String title, String date, boolean isCompleted, String type) {
         this.id = id;
         this.title = title;
         this.date = date;
         this.isCompleted = isCompleted;
+        this.type = type;
     }
 
     public Task(String title, String date, boolean isCompleted) {
@@ -49,5 +51,13 @@ public class Task {
 
     public void setCompleted(boolean completed) {
         isCompleted = completed;
+    }
+
+    public String getType() {
+        return type;
+    }
+
+    public void setType(String type) {
+        this.type = type;
     }
 }

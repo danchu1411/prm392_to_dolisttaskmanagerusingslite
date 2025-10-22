@@ -5,9 +5,11 @@ import android.app.DatePickerDialog;
 import android.content.DialogInterface;
 import android.os.Bundle;
 import android.view.View;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.DatePicker;
 import android.widget.EditText;
+import android.widget.Spinner;
 import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
@@ -26,11 +28,13 @@ import java.util.Locale;
 import java.util.Objects;
 
 public class MainActivity extends AppCompatActivity implements TaskAdapter.OnItemActionListener {
-    private EditText etTitle, etContent, etDate, etType;
+    private EditText etTitle, etContent, etDate;
+    private Spinner spinnerType;
     private Button btnAdd;
     private RecyclerView rvTaskList;
     private TaskAdapter taskAdapter;
     private List<Task> taskList;
+    private ArrayAdapter<CharSequence> typeAdapter;
     private DatabaseHelper databaseHelper;
 
     private SimpleDateFormat dateFormater;
@@ -55,9 +59,14 @@ public class MainActivity extends AppCompatActivity implements TaskAdapter.OnIte
         etTitle = findViewById(R.id.et_title);
         etContent = findViewById(R.id.et_content);
         etDate = findViewById(R.id.et_date);
-        etType = findViewById(R.id.et_type);
+        spinnerType = findViewById(R.id.spinner_type);
         btnAdd = findViewById(R.id.btn_add);
         rvTaskList = findViewById(R.id.rv_task_list);
+
+        // Setup Spinner
+        typeAdapter = ArrayAdapter.createFromResource(this, R.array.task_types, android.R.layout.simple_spinner_item);
+        typeAdapter.setDropDownViewResource(android.R.layout.simple_spinner_item);
+        spinnerType.setAdapter(typeAdapter);
 
         // Initialize DatabaseHelper
         databaseHelper = new DatabaseHelper(this);
@@ -117,7 +126,7 @@ public class MainActivity extends AppCompatActivity implements TaskAdapter.OnIte
         String title = etTitle.getText().toString().trim();
         String content = etContent.getText().toString().trim(); // Assuming 'content' will be used later or mapped to 'date'
         String date = etDate.getText().toString().trim();
-        String type = etType.getText().toString().trim(); // Assuming 'type' will be used later or mapped to 'isCompleted'
+        String type = spinnerType.getSelectedItem().toString(); // Assuming 'type' will be used later or mapped to 'isCompleted'
 
         if (title.isEmpty() || date.isEmpty() || content.isEmpty() || type.isEmpty()) {
             Toast.makeText(this, "Please fill in all fields", Toast.LENGTH_SHORT).show();
@@ -141,7 +150,7 @@ public class MainActivity extends AppCompatActivity implements TaskAdapter.OnIte
         String title = etTitle.getText().toString().trim();
         String content = etContent.getText().toString().trim();
         String date = etDate.getText().toString().trim();
-        String type = etType.getText().toString().trim();
+        String type = spinnerType.getSelectedItem().toString();
 
         if (title.isEmpty() || date.isEmpty() || content.isEmpty() || type.isEmpty()) {
             Toast.makeText(this, "Please fill in all fields", Toast.LENGTH_SHORT).show();
@@ -151,7 +160,7 @@ public class MainActivity extends AppCompatActivity implements TaskAdapter.OnIte
         // Get the existing task to preserve its isCompleted status
         Task existingTask = databaseHelper.getTask(taskIdToUpdate);
         if (existingTask != null) {
-            Task updatedTask = new Task(taskIdToUpdate, title, date, existingTask.isCompleted());
+            Task updatedTask = new Task(taskIdToUpdate, title, date, existingTask.isCompleted(), type);
             int rowsAffected = databaseHelper.updateTask(updatedTask);
             if (rowsAffected > 0) {
                 // Update the task in the list
@@ -183,7 +192,7 @@ public class MainActivity extends AppCompatActivity implements TaskAdapter.OnIte
         etTitle.setText("");
         etContent.setText("");
         etDate.setText("");
-        etType.setText("");
+        spinnerType.setSelection(0);
     }
 
     @Override
@@ -191,6 +200,7 @@ public class MainActivity extends AppCompatActivity implements TaskAdapter.OnIte
         Task task = taskList.get(position);
         etTitle.setText(task.getTitle());
         etDate.setText(task.getDate());
+        spinnerType.setSelection(typeAdapter.getPosition(task.getType()));
         btnAdd.setText("SAVE");
         isEditMode = true;
         taskIdToUpdate = task.getId();
