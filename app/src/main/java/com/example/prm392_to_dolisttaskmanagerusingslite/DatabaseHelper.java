@@ -11,7 +11,7 @@ import java.util.List;
 
 public class DatabaseHelper extends SQLiteOpenHelper {
     private static final String DATABASE_NAME = "taskmanager.db";
-    private static final int DATABASE_VERSION = 4;
+    private static final int DATABASE_VERSION = 5;
 
     public static final String TABLE_TASKS = "tasks";
     public static final String COLUMN_ID = "id";
@@ -107,6 +107,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         values.put(COLUMN_CONTENT, task.getContent());
         values.put(COLUMN_DATE, task.getDate());
         values.put(COLUMN_IS_COMPLETED, task.isCompleted() ? 1 : 0);
+        values.put(COLUMN_TYPE, task.getType());
         int rowsAffected = db.update(TABLE_TASKS,
                 values,
                 COLUMN_ID + " = ?",
@@ -128,7 +129,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     public Task getTask(int id) {
         SQLiteDatabase db = this.getReadableDatabase();
         Cursor cursor = db.query(TABLE_TASKS,
-                new String[]{COLUMN_ID, COLUMN_TITLE, COLUMN_CONTENT,COLUMN_DATE, COLUMN_IS_COMPLETED},
+                new String[]{COLUMN_ID, COLUMN_TITLE, COLUMN_CONTENT, COLUMN_DATE, COLUMN_IS_COMPLETED},
                 COLUMN_ID + " = ?",
                 new String[]{String.valueOf(id)},
                 null, null, null, null);
