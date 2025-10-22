@@ -128,7 +128,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     public Task getTask(int id) {
         SQLiteDatabase db = this.getReadableDatabase();
         Cursor cursor = db.query(TABLE_TASKS,
-                new String[]{COLUMN_ID, COLUMN_TITLE, COLUMN_DATE, COLUMN_IS_COMPLETED},
+                new String[]{COLUMN_ID, COLUMN_TITLE, COLUMN_CONTENT,COLUMN_DATE, COLUMN_IS_COMPLETED},
                 COLUMN_ID + " = ?",
                 new String[]{String.valueOf(id)},
                 null, null, null, null);
