@@ -123,16 +123,16 @@ public class MainActivity extends AppCompatActivity implements TaskAdapter.OnIte
 
     private void addTask() {
         String title = etTitle.getText().toString().trim();
-        String content = etContent.getText().toString().trim(); // Assuming 'content' will be used later or mapped to 'date'
+        String content = etContent.getText().toString().trim();
         String date = etDate.getText().toString().trim();
-        String type = spinnerType.getSelectedItem().toString(); // Assuming 'type' will be used later or mapped to 'isCompleted'
+        String type = spinnerType.getSelectedItem().toString();
 
         if (title.isEmpty() || date.isEmpty() || content.isEmpty() || type.isEmpty()) {
             Toast.makeText(this, "Please fill in all fields", Toast.LENGTH_SHORT).show();
             return;
         }
 
-        Task newTask = new Task(title, date, false, type);
+        Task newTask = new Task(title, content, date, false, type);
         long newId = databaseHelper.addTask(newTask);
         if (newId > 0) {
             newTask.setId((int) newId);
@@ -159,7 +159,7 @@ public class MainActivity extends AppCompatActivity implements TaskAdapter.OnIte
         // Get the existing task to preserve its isCompleted status
         Task existingTask = databaseHelper.getTask(taskIdToUpdate);
         if (existingTask != null) {
-            Task updatedTask = new Task(taskIdToUpdate, title, date, existingTask.isCompleted(), type);
+            Task updatedTask = new Task(taskIdToUpdate, title, content, date, existingTask.isCompleted(), type);
             int rowsAffected = databaseHelper.updateTask(updatedTask);
             if (rowsAffected > 0) {
                 // Update the task in the list
@@ -198,6 +198,7 @@ public class MainActivity extends AppCompatActivity implements TaskAdapter.OnIte
     public void onEditTask(int position) {
         Task task = taskList.get(position);
         etTitle.setText(task.getTitle());
+        etContent.setText(task.getContent());
         etDate.setText(task.getDate());
         spinnerType.setSelection(typeAdapter.getPosition(task.getType()));
         btnAdd.setText("SAVE");
