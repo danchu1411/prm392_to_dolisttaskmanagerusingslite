@@ -67,6 +67,8 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.TaskViewHolder
             backgroundColorResId = R.color.task_easy_bg;
         }
 
+        holder.itemView.setBackgroundResource(backgroundColorResId);
+
         // Set listeners for checkbox, edit, and delete icons
         holder.cbTaskStatus.setOnCheckedChangeListener(null); // Clear previous listener to avoid issues with recycling
         holder.cbTaskStatus.setChecked(task.isCompleted()); // Set state again after clearing listener
