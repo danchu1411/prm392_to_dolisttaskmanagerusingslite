@@ -11,7 +11,7 @@ import java.util.List;
 
 public class DatabaseHelper extends SQLiteOpenHelper {
     private static final String DATABASE_NAME = "taskmanager.db";
-    private static final int DATABASE_VERSION = 5;
+    private static final int DATABASE_VERSION = 6; // Incrementing version to trigger onUpgrade
 
     public static final String TABLE_TASKS = "tasks";
     public static final String COLUMN_ID = "id";
@@ -31,7 +31,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
     public DatabaseHelper(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
-        // Removed the recursive call that was here.
     }
 
     private void addTaskInternal(SQLiteDatabase db, Task task) {
@@ -45,7 +44,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     }
 
     private void writeSampleData(SQLiteDatabase db) {
-        // Add sample data to the database
         addTaskInternal(db, new Task("Do math",  "Agebra","2023-02-28", false, "Easy"));
         addTaskInternal(db, new Task("Do homework", "Math","2023-02-27", true, "Medium"));
         addTaskInternal(db, new Task("Go to gym", "Bodybuilding","2023-02-26", false, "Hard"));
@@ -59,11 +57,11 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
+        // A simpler upgrade strategy for development: drop and recreate
         db.execSQL("DROP TABLE IF EXISTS " + TABLE_TASKS);
         onCreate(db);
     }
 
-    // Add a new task to the database - this method will be used for adding tasks *after* initial creation
     public long addTask(Task task) {
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues values = new ContentValues();
@@ -71,16 +69,16 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         values.put(COLUMN_CONTENT, task.getContent());
         values.put(COLUMN_DATE, task.getDate());
         values.put(COLUMN_IS_COMPLETED, task.isCompleted() ? 1 : 0);
+        values.put(COLUMN_TYPE, task.getType()); // FIX: Added type column to addTask
         long id = db.insert(TABLE_TASKS, null, values);
-        db.close(); // Keep db.close() here as getWritableDatabase() opens a new connection
+        db.close();
         return id;
     }
 
-    // Get all tasks from the database
     public List<Task> getAllTasks() {
         List<Task> taskList = new ArrayList<>();
         String selectQuery = "SELECT * FROM " + TABLE_TASKS;
-        SQLiteDatabase db = this.getWritableDatabase(); // Changed to getWritableDatabase for consistency
+        SQLiteDatabase db = this.getWritableDatabase();
         Cursor cursor = db.rawQuery(selectQuery, null);
 
         if (cursor.moveToFirst()) {
@@ -95,11 +93,10 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             } while (cursor.moveToNext());
         }
         cursor.close();
-        db.close(); // Close the database connection
+        db.close();
         return taskList;
     }
 
-    // Update a task in the database
     public int updateTask(Task task) {
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues values = new ContentValues();
@@ -116,7 +113,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         return rowsAffected;
     }
 
-    // Delete a task from the database
     public void deleteTask(int taskId) {
         SQLiteDatabase db = this.getWritableDatabase();
         db.delete(TABLE_TASKS,
@@ -125,11 +121,10 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         db.close();
     }
 
-    // Get a single task by ID
     public Task getTask(int id) {
         SQLiteDatabase db = this.getReadableDatabase();
         Cursor cursor = db.query(TABLE_TASKS,
-                new String[]{COLUMN_ID, COLUMN_TITLE, COLUMN_CONTENT, COLUMN_DATE, COLUMN_IS_COMPLETED},
+                new String[]{COLUMN_ID, COLUMN_TITLE, COLUMN_CONTENT, COLUMN_DATE, COLUMN_IS_COMPLETED, COLUMN_TYPE}, // FIX: Added COLUMN_TYPE to projection
                 COLUMN_ID + " = ?",
                 new String[]{String.valueOf(id)},
                 null, null, null, null);
@@ -144,7 +139,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                     cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_TYPE)));
             cursor.close();
         }
-        db.close(); // Close the database connection
+        db.close();
         return task;
     }
 }
