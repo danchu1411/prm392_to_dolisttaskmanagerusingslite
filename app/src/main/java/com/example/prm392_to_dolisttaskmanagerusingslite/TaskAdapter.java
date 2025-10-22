@@ -43,6 +43,30 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.TaskViewHolder
             holder.tvTaskTitle.setPaintFlags(holder.tvTaskTitle.getPaintFlags() & (~Paint.STRIKE_THRU_TEXT_FLAG));
         }
 
+        // Background color change based on task type
+        int backgroundColorResId;
+        String taskType = task.getType();
+
+        if(taskType != null) {
+            switch (taskType) {
+                case "Easy":
+                    backgroundColorResId = R.color.task_easy_bg;
+                    break;
+                case "Medium":
+                    backgroundColorResId = R.color.task_medium_bg;
+                    break;
+                case "Hard":
+                    backgroundColorResId = R.color.task_hard_bg;
+                    break;
+                default:
+                    backgroundColorResId = R.color.task_easy_bg;
+                    break;
+            }
+        }
+        else {
+            backgroundColorResId = R.color.task_easy_bg;
+        }
+
         // Set listeners for checkbox, edit, and delete icons
         holder.cbTaskStatus.setOnCheckedChangeListener(null); // Clear previous listener to avoid issues with recycling
         holder.cbTaskStatus.setChecked(task.isCompleted()); // Set state again after clearing listener

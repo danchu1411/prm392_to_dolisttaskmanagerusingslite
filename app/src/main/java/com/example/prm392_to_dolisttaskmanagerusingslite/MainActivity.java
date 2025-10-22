@@ -119,7 +119,6 @@ public class MainActivity extends AppCompatActivity implements TaskAdapter.OnIte
                 datePickerDialog.show();
             }
         });
-
     }
 
     private void addTask() {
