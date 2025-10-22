@@ -27,24 +27,28 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
     public DatabaseHelper(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
-        // Create samples data
-        DatabaseHelper db = new DatabaseHelper(context);
-        writeSampleData(db);
+        // Removed the recursive call that was here.
     }
 
-    private void writeSampleData(DatabaseHelper db) {
+    private void addTaskInternal(SQLiteDatabase db, Task task) {
+        ContentValues values = new ContentValues();
+        values.put(COLUMN_TITLE, task.getTitle());
+        values.put(COLUMN_DATE, task.getDate());
+        values.put(COLUMN_IS_COMPLETED, task.isCompleted() ? 1 : 0);
+        db.insert(TABLE_TASKS, null, values);
+    }
+
+    private void writeSampleData(SQLiteDatabase db) {
         // Add sample data to the database
-        Task task1 = new Task("Do math", "2023-02-28", false);
-        Task task2 = new Task("Do homework", "2023-02-27", true);
-        Task task3 = new Task("Go to gym", "2023-02-26", false);
-        db.addTask(task1);
-        db.addTask(task2);
-        db.addTask(task3);
+        addTaskInternal(db, new Task("Do math", "2023-02-28", false));
+        addTaskInternal(db, new Task("Do homework", "2023-02-27", true));
+        addTaskInternal(db, new Task("Go to gym", "2023-02-26", false));
     }
 
     @Override
     public void onCreate(SQLiteDatabase db) {
         db.execSQL(CREATE_TABLE_TASKS);
+        writeSampleData(db); // Call writeSampleData when the database is created
     }
 
     @Override
@@ -53,7 +57,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         onCreate(db);
     }
 
-    // Add a new task to the database
+    // Add a new task to the database - this method will be used for adding tasks *after* initial creation
     public long addTask(Task task) {
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues values = new ContentValues();
@@ -61,7 +65,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         values.put(COLUMN_DATE, task.getDate());
         values.put(COLUMN_IS_COMPLETED, task.isCompleted() ? 1 : 0);
         long id = db.insert(TABLE_TASKS, null, values);
-        db.close();
+        db.close(); // Keep db.close() here as getWritableDatabase() opens a new connection
         return id;
     }
 
@@ -69,7 +73,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     public List<Task> getAllTasks() {
         List<Task> taskList = new ArrayList<>();
         String selectQuery = "SELECT * FROM " + TABLE_TASKS;
-        SQLiteDatabase db = this.getWritableDatabase();
+        SQLiteDatabase db = this.getWritableDatabase(); // Changed to getWritableDatabase for consistency
         Cursor cursor = db.rawQuery(selectQuery, null);
 
         if (cursor.moveToFirst()) {
@@ -82,7 +86,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             } while (cursor.moveToNext());
         }
         cursor.close();
-        db.close();
+        db.close(); // Close the database connection
         return taskList;
     }
 
@@ -127,7 +131,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                     cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_IS_COMPLETED)) == 1);
             cursor.close();
         }
-        db.close();
+        db.close(); // Close the database connection
         return task;
     }
 }
