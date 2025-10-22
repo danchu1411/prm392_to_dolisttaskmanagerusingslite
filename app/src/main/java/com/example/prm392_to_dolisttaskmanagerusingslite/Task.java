@@ -3,20 +3,23 @@ package com.example.prm392_to_dolisttaskmanagerusingslite;
 public class Task {
     private int id;
     private String title;
+    private String content;
     private String date;
     private boolean isCompleted;
     private String type;
 
-    public Task(int id, String title, String date, boolean isCompleted, String type) {
+    public Task(int id, String title, String content,String date, boolean isCompleted, String type) {
         this.id = id;
         this.title = title;
+        this.content = content;
         this.date = date;
         this.isCompleted = isCompleted;
         this.type = type;
     }
 
-    public Task(String title, String date, boolean isCompleted, String type) {
+    public Task(String title, String content,String date, boolean isCompleted, String type) {
         this.title = title;
+        this.content = content;
         this.date = date;
         this.isCompleted = isCompleted;
         this.type = type;
@@ -60,5 +63,13 @@ public class Task {
 
     public void setType(String type) {
         this.type = type;
+    }
+
+    public String getContent() {
+        return content;
+    }
+
+    public void setContent(String content) {
+        this.content = content;
     }
 }

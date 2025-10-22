@@ -11,11 +11,12 @@ import java.util.List;
 
 public class DatabaseHelper extends SQLiteOpenHelper {
     private static final String DATABASE_NAME = "taskmanager.db";
-    private static final int DATABASE_VERSION = 3;
+    private static final int DATABASE_VERSION = 4;
 
     public static final String TABLE_TASKS = "tasks";
     public static final String COLUMN_ID = "id";
     public static final String COLUMN_TITLE = "title";
+    public static final String COLUMN_CONTENT = "content";
     public static final String COLUMN_DATE = "date";
     public static final String COLUMN_IS_COMPLETED = "is_completed";
     public static final String COLUMN_TYPE = "type";
@@ -23,6 +24,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     private static final String CREATE_TABLE_TASKS = "CREATE TABLE " + TABLE_TASKS + " (" +
             COLUMN_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
             COLUMN_TITLE + " TEXT, " +
+            COLUMN_CONTENT + " TEXT, " +
             COLUMN_DATE + " TEXT, " +
             COLUMN_IS_COMPLETED + " INTEGER DEFAULT 0, " +
             COLUMN_TYPE + " TEXT)";
@@ -35,6 +37,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     private void addTaskInternal(SQLiteDatabase db, Task task) {
         ContentValues values = new ContentValues();
         values.put(COLUMN_TITLE, task.getTitle());
+        values.put(COLUMN_CONTENT, task.getContent());
         values.put(COLUMN_DATE, task.getDate());
         values.put(COLUMN_IS_COMPLETED, task.isCompleted() ? 1 : 0);
         values.put(COLUMN_TYPE, task.getType());
@@ -43,9 +46,9 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
     private void writeSampleData(SQLiteDatabase db) {
         // Add sample data to the database
-        addTaskInternal(db, new Task("Do math", "2023-02-28", false, "Easy"));
-        addTaskInternal(db, new Task("Do homework", "2023-02-27", true, "Medium"));
-        addTaskInternal(db, new Task("Go to gym", "2023-02-26", false, "Hard"));
+        addTaskInternal(db, new Task("Do math",  "Agebra","2023-02-28", false, "Easy"));
+        addTaskInternal(db, new Task("Do homework", "Math","2023-02-27", true, "Medium"));
+        addTaskInternal(db, new Task("Go to gym", "Bodybuilding","2023-02-26", false, "Hard"));
     }
 
     @Override
@@ -65,6 +68,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues values = new ContentValues();
         values.put(COLUMN_TITLE, task.getTitle());
+        values.put(COLUMN_CONTENT, task.getContent());
         values.put(COLUMN_DATE, task.getDate());
         values.put(COLUMN_IS_COMPLETED, task.isCompleted() ? 1 : 0);
         long id = db.insert(TABLE_TASKS, null, values);
@@ -83,10 +87,11 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             do {
                 int id = cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_ID));
                 String title = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_TITLE));
+                String content = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_CONTENT));
                 String date = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_DATE));
                 boolean isCompleted = cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_IS_COMPLETED)) == 1;
                 String type = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_TYPE));
-                taskList.add(new Task(id, title, date, isCompleted, type));
+                taskList.add(new Task(id, title, content,date, isCompleted, type));
             } while (cursor.moveToNext());
         }
         cursor.close();
@@ -99,6 +104,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues values = new ContentValues();
         values.put(COLUMN_TITLE, task.getTitle());
+        values.put(COLUMN_CONTENT, task.getContent());
         values.put(COLUMN_DATE, task.getDate());
         values.put(COLUMN_IS_COMPLETED, task.isCompleted() ? 1 : 0);
         int rowsAffected = db.update(TABLE_TASKS,
@@ -131,6 +137,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             task = new Task(
                     cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_ID)),
                     cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_TITLE)),
+                    cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_CONTENT)),
                     cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_DATE)),
                     cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_IS_COMPLETED)) == 1,
                     cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_TYPE)));

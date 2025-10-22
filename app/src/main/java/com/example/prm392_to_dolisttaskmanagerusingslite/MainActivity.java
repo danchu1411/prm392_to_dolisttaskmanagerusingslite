@@ -132,7 +132,7 @@ public class MainActivity extends AppCompatActivity implements TaskAdapter.OnIte
             return;
         }
 
-        Task newTask = new Task(title, date, false);
+        Task newTask = new Task(title, date, false, type);
         long newId = databaseHelper.addTask(newTask);
         if (newId > 0) {
             newTask.setId((int) newId);
