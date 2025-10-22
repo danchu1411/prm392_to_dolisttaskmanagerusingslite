@@ -19,7 +19,6 @@ import androidx.recyclerview.widget.RecyclerView;
 import java.util.List;
 
 public class MainActivity extends AppCompatActivity implements TaskAdapter.OnItemActionListener {
-
     private EditText etTitle, etContent, etDate, etType;
     private Button btnAdd;
     private RecyclerView rvTaskList;
@@ -148,12 +147,7 @@ public class MainActivity extends AppCompatActivity implements TaskAdapter.OnIte
     public void onEditTask(int position) {
         Task task = taskList.get(position);
         etTitle.setText(task.getTitle());
-        // Assuming 'content' field in layout maps to some detail not present in Task currently, or will be derived.
-        // For now, let's keep it simple and only populate fields we have in Task.
-        // etContent.setText(task.getContent()); // No 'content' field in Task yet, adjust if needed
         etDate.setText(task.getDate());
-        // etType.setText(task.getType()); // No 'type' field in Task yet, adjust if needed
-
         btnAdd.setText("SAVE");
         isEditMode = true;
         taskIdToUpdate = task.getId();
@@ -173,7 +167,6 @@ public class MainActivity extends AppCompatActivity implements TaskAdapter.OnIte
                         taskList.remove(position);
                         taskAdapter.notifyItemRemoved(position);
                         Toast.makeText(MainActivity.this, "Task deleted successfully", Toast.LENGTH_SHORT).show();
-                        // If a task was being edited and then deleted, reset form
                         if (isEditMode && taskIdToUpdate == task.getId()) {
                             clearInputFields();
                             btnAdd.setText("ADD");
@@ -191,10 +184,9 @@ public class MainActivity extends AppCompatActivity implements TaskAdapter.OnIte
         Task task = taskList.get(position);
         task.setCompleted(isChecked);
         databaseHelper.updateTask(task);
-        
-        // Defer the notifyItemChanged call to avoid IllegalStateException
+
         rvTaskList.post(() -> {
-            taskAdapter.notifyItemChanged(position); // Notify adapter to re-bind item, applying strike-through
+            taskAdapter.notifyItemChanged(position);
         });
     }
 }

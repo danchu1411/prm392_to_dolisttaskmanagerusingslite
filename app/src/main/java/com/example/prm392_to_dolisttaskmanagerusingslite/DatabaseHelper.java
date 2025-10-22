@@ -10,7 +10,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class DatabaseHelper extends SQLiteOpenHelper {
-
     private static final String DATABASE_NAME = "taskmanager.db";
     private static final int DATABASE_VERSION = 1;
 
@@ -28,6 +27,19 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
     public DatabaseHelper(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
+        // Create samples data
+        DatabaseHelper db = new DatabaseHelper(context);
+        writeSampleData(db);
+    }
+
+    private void writeSampleData(DatabaseHelper db) {
+        // Add sample data to the database
+        Task task1 = new Task("Do math", "2023-02-28", false);
+        Task task2 = new Task("Do homework", "2023-02-27", true);
+        Task task3 = new Task("Go to gym", "2023-02-26", false);
+        db.addTask(task1);
+        db.addTask(task2);
+        db.addTask(task3);
     }
 
     @Override
