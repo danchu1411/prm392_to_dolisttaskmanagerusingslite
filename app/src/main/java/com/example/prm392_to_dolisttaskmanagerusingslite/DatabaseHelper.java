@@ -11,7 +11,7 @@ import java.util.List;
 
 public class DatabaseHelper extends SQLiteOpenHelper {
     private static final String DATABASE_NAME = "taskmanager.db";
-    private static final int DATABASE_VERSION = 6; // Incrementing version to trigger onUpgrade
+    private static final int DATABASE_VERSION = 6;
 
     public static final String TABLE_TASKS = "tasks";
     public static final String COLUMN_ID = "id";
@@ -57,7 +57,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-        // A simpler upgrade strategy for development: drop and recreate
         db.execSQL("DROP TABLE IF EXISTS " + TABLE_TASKS);
         onCreate(db);
     }
@@ -69,7 +68,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         values.put(COLUMN_CONTENT, task.getContent());
         values.put(COLUMN_DATE, task.getDate());
         values.put(COLUMN_IS_COMPLETED, task.isCompleted() ? 1 : 0);
-        values.put(COLUMN_TYPE, task.getType()); // FIX: Added type column to addTask
+        values.put(COLUMN_TYPE, task.getType());
         long id = db.insert(TABLE_TASKS, null, values);
         db.close();
         return id;

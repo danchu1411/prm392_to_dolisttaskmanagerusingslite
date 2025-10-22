@@ -23,6 +23,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
@@ -116,9 +117,33 @@ public class MainActivity extends AppCompatActivity implements TaskAdapter.OnIte
                         newCalendar.get(Calendar.YEAR),
                         newCalendar.get(Calendar.MONTH),
                         newCalendar.get(Calendar.DAY_OF_MONTH));
+
+                // Set minimum date to today to prevent choosing past dates
+                datePickerDialog.getDatePicker().setMinDate(System.currentTimeMillis() - 1000); // Subtract 1 sec to allow current day
                 datePickerDialog.show();
             }
         });
+    }
+
+    // Helper method to validate if the selected date is not in the past
+    private boolean isFutureDate(String dateString) {
+        if (dateString.isEmpty()) {
+            return false; // Or handle as an empty date case
+        }
+        try {
+            Date selectedDate = dateFormater.parse(dateString);
+            Calendar today = Calendar.getInstance();
+            today.set(Calendar.HOUR_OF_DAY, 0);
+            today.set(Calendar.MINUTE, 0);
+            today.set(Calendar.SECOND, 0);
+            today.set(Calendar.MILLISECOND, 0);
+
+            // Compare the selected date with today's date (start of day)
+            return !Objects.requireNonNull(selectedDate).before(today.getTime());
+        } catch (ParseException e) {
+            e.printStackTrace();
+            return false; // Invalid date format
+        }
     }
 
     private void addTask() {
@@ -129,6 +154,12 @@ public class MainActivity extends AppCompatActivity implements TaskAdapter.OnIte
 
         if (title.isEmpty() || date.isEmpty() || content.isEmpty() || type.isEmpty()) {
             Toast.makeText(this, "Please fill in all fields", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        // Date validation before adding task
+        if (!isFutureDate(date)) {
+            Toast.makeText(this, "Task date cannot be in the past", Toast.LENGTH_SHORT).show();
             return;
         }
 
@@ -153,6 +184,12 @@ public class MainActivity extends AppCompatActivity implements TaskAdapter.OnIte
 
         if (title.isEmpty() || date.isEmpty() || content.isEmpty() || type.isEmpty()) {
             Toast.makeText(this, "Please fill in all fields", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        // Date validation before updating task
+        if (!isFutureDate(date)) {
+            Toast.makeText(this, "Task date cannot be in the past", Toast.LENGTH_SHORT).show();
             return;
         }
 
@@ -181,7 +218,7 @@ public class MainActivity extends AppCompatActivity implements TaskAdapter.OnIte
                 Toast.makeText(this, "Task updated successfully", Toast.LENGTH_SHORT).show();
             } else {
                 Toast.makeText(this, "Failed to update task", Toast.LENGTH_SHORT).show();
-            }
+            }s
         } else {
             Toast.makeText(this, "Task not found for update", Toast.LENGTH_SHORT).show();
         }
