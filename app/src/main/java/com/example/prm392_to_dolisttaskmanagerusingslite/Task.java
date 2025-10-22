@@ -15,10 +15,11 @@ public class Task {
         this.type = type;
     }
 
-    public Task(String title, String date, boolean isCompleted) {
+    public Task(String title, String date, boolean isCompleted, String type) {
         this.title = title;
         this.date = date;
         this.isCompleted = isCompleted;
+        this.type = type;
     }
 
     public int getId() {

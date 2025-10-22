@@ -37,15 +37,15 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         values.put(COLUMN_TITLE, task.getTitle());
         values.put(COLUMN_DATE, task.getDate());
         values.put(COLUMN_IS_COMPLETED, task.isCompleted() ? 1 : 0);
-        values.put(COLUMN_IS_COMPLETED, task.getType());
+        values.put(COLUMN_TYPE, task.getType());
         db.insert(TABLE_TASKS, null, values);
     }
 
     private void writeSampleData(SQLiteDatabase db) {
         // Add sample data to the database
-        addTaskInternal(db, new Task("Do math", "2023-02-28", false));
-        addTaskInternal(db, new Task("Do homework", "2023-02-27", true));
-        addTaskInternal(db, new Task("Go to gym", "2023-02-26", false));
+        addTaskInternal(db, new Task("Do math", "2023-02-28", false, "Easy"));
+        addTaskInternal(db, new Task("Do homework", "2023-02-27", true, "Medium"));
+        addTaskInternal(db, new Task("Go to gym", "2023-02-26", false, "Hard"));
     }
 
     @Override
